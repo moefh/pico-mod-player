@@ -51,6 +51,91 @@ And this is the setup on a breadboard with the LM386 chip:
 As before, the output of the amplifier is connected to a small 8Ω speaker.
 
 
+## Source Code
+
+To build the code, make sure you have the **pico-sdk** installed
+correctly, and then:
+
+```
+git clone https://github.com/moefh/pico-mod-player.git
+cd pico-mod-player
+mkdir build
+cd build
+cmake ..
+make
+```
+
+This will build two binaries you can send to the Pico:
+`simple/simple_mod_player.uf2` and `async/async_mod_player.uf2`.
+
+### Simple Player
+
+The "simple" MOD player in the directory `simple/` plays the MOD in
+the main CPU core (the core where your code starts running in
+`main()`).  It must periodically call the MOD player to fill the
+output sound buffer from your main loop; something like (see
+`simple/main.c`):
+
+```C
+// [...]
+
+#include "audio.h"
+#include "mod_play.h"
+
+static void update_mod_player(void)
+{
+  uint8_t *audio_buffer = audio_get_buffer();
+  if (audio_buffer) {
+    mod_play_step(audio_buffer, AUDIO_BUFFER_SIZE);
+  }
+}
+
+// [...]
+
+int main(void)
+{
+  // [...]
+
+  audio_init(/* ... stuff ... */);
+  mod_play_start(/* ... stuff ... */);
+
+  while (1) {
+    // [...]
+    update_mod_player();
+  }
+}
+```
+
+
+### Asynchronous Player
+
+The "async" MOD player in the directory `async/` plays the MOD from
+the second CPU core (`core1`).  It tells the MOD to start playing
+and forgets about it (see `async/main.c`):
+
+```C
+// [...]
+
+#include "async_msg.h"
+#include "mod_data.h"
+
+// [...]
+
+int main(void)
+{
+  // [...]
+
+  async_init();
+  async_audio_init(/* ... same stuff as before */);
+  async_mod_start(/* ... same stuff as before */);
+
+  while (1) {
+    // no need to update the MOD player here
+  }
+}
+```
+
+
 ## License
 
 The source code is distributed under the MIT License.
