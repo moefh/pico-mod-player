@@ -65,11 +65,9 @@ int main(void)
   stdio_init_all();
   led_init(LED_PIN);
 
-  sleep_ms(3000); printf("=== INIT ==========\n");
-  if (sound_i2s_init(&sound_config)) {
-    printf("ERROR: can't init sound\n");
-    while (1) {}
-  }
+  //sleep_ms(3000); printf("=== INIT ==========\n");
+
+  sound_i2s_init(&sound_config);
   mod_play_start(&mod_the_softliner, SOUND_OUTPUT_FREQUENCY, 1);
   sound_i2s_playback_start();
 
