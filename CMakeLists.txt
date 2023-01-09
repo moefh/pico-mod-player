@@ -11,3 +11,4 @@ pico_sdk_init()
 
 add_subdirectory(simple)
 add_subdirectory(async)
+add_subdirectory(i2s)
