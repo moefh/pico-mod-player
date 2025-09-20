@@ -57,9 +57,9 @@ int sound_i2s_init(const struct sound_i2s_config *cfg)
   uint offset = pio_add_program(sound_pio, (config.bits_per_sample == 8) ? &sound_i2s_8bits_program : &sound_i2s_16bits_program);
   sound_pio_sm = pio_claim_unused_sm(sound_pio, true);
   if (config.bits_per_sample == 8) {
-    sound_i2s_8bits_program_init(sound_pio, sound_pio_sm, offset, config.sample_rate, config.pin_sda, config.pin_scl);
+    sound_i2s_8bits_program_init(sound_pio, sound_pio_sm, offset, config.sample_rate, config.pin_data, config.pin_clock_base);
   } else {
-    sound_i2s_16bits_program_init(sound_pio, sound_pio_sm, offset, config.sample_rate, config.pin_sda, config.pin_scl);
+    sound_i2s_16bits_program_init(sound_pio, sound_pio_sm, offset, config.sample_rate, config.pin_data, config.pin_clock_base);
   }
 
   // allocate dma channel and setup irq

@@ -9,9 +9,8 @@
 
 struct sound_i2s_config {
   uint8_t  pio_num;
-  uint8_t  pin_scl;
-  uint8_t  pin_sda;
-  uint8_t  pin_ws;
+  uint8_t  pin_clock_base;
+  uint8_t  pin_data;
   uint16_t sample_rate;
   uint8_t  bits_per_sample;
 };

@@ -9,18 +9,24 @@
 #include "../data/the_softliner.h"
 
 #define LED_PIN           25
-#define SND_PIN_SCL       16
-#define SND_PIN_WS        17
-#define SND_PIN_SDA       18
+#define SND_PIN_DATA      16
+#define SND_PIN_BIT_CLOCK 17
+#define SND_PIN_SPL_CLOCK (SND_PIN_BIT_CLOCK+1)  // PIO requires this to be immediately after SND_PIN_BIT_CLOCK
 
 #define SOUND_OUTPUT_FREQUENCY 22050
+#define SOUND_SAMPLE_SIZE      16
+
+#if SOUND_SAMPLE_SIZE==16
+typedef int16_t sound_sample_type;
+#else
+typedef int8_t sound_sample_type;
+#endif
 
 static const struct sound_i2s_config sound_config = {
-  .pin_scl         = SND_PIN_SCL,
-  .pin_sda         = SND_PIN_SDA,
-  .pin_ws          = SND_PIN_WS,
+  .pin_clock_base  = SND_PIN_BIT_CLOCK,
+  .pin_data        = SND_PIN_DATA,
   .sample_rate     = SOUND_OUTPUT_FREQUENCY,
-  .bits_per_sample = 8,
+  .bits_per_sample = 16,
   .pio_num         = 0,
 };
 
@@ -45,17 +51,23 @@ static void led_blink(uint pin)
 
 static void update_mod_player(void)
 {
-  static int8_t *last_buffer;
+  static sound_sample_type *last_buffer;
   static unsigned char tmp_buffer[SOUND_I2S_BUFFER_NUM_SAMPLES];
   
-  int8_t *buffer = sound_i2s_get_next_buffer();
+  sound_sample_type *buffer = sound_i2s_get_next_buffer();
   if (buffer != last_buffer) {
     last_buffer = buffer;
     mod_play_step(tmp_buffer, SOUND_I2S_BUFFER_NUM_SAMPLES);
     for (int i = 0; i < SOUND_I2S_BUFFER_NUM_SAMPLES; i++) {
+#if SOUND_SAMPLE_SIZE==16
+      int16_t sample = (tmp_buffer[i]<<8) - 32768;
+      *buffer++ = sample;
+      *buffer++ = sample;
+#else
       int8_t sample = tmp_buffer[i] - 128;
       *buffer++ = sample;
       *buffer++ = sample;
+#endif
     }
   }
 }
