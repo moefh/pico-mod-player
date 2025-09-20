@@ -346,6 +346,9 @@ static int start_row(void)
     // only jump back if looping is enabled
     if (state.jump_to_song_pos > state.cur_song_pos || state.loop_enabled) {
       state.cur_song_pos = state.jump_to_song_pos;
+      if (state.cur_song_pos >= state.mod->num_song_positions) {
+          state.cur_song_pos = 0;
+      }
       state.cur_row = state.jump_to_row;
       state.cur_pattern = state.mod->song_positions[state.cur_song_pos];
       state.jump_enabled = 0;
